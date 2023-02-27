@@ -166,7 +166,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
             System.setProperty("mixin.env.remapRefMap", "true");
         }
 
-        if (MixinServiceLaunchWrapper.findInStackTrace("net.minecraft.launchwrapper.Launch", "launch") > 132) {
+        if (MixinServiceLaunchWrapper.findInStackTrace("com.cleanroommc.bouncepad.Bouncepad", "launch") > 132) {
             return Phase.DEFAULT;
         }
         return Phase.PREINIT;
@@ -191,7 +191,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public void init() {
-        if (MixinServiceLaunchWrapper.findInStackTrace("net.minecraft.launchwrapper.Launch", "launch") < 4) {
+        if (MixinServiceLaunchWrapper.findInStackTrace("com.cleanroommc.bouncepad.Bouncepad", "launch") < 4) {
             MixinServiceLaunchWrapper.logger.error("MixinBootstrap.doInit() called during a tweak constructor!");
         }
 

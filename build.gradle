@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1'
         classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
-        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.2.0' : '7.1.0')
+        classpath 'com.guardsquare:proguard-gradle:7.2.0'
     }
 }
 
@@ -69,6 +69,10 @@ repositories {
         // For modlauncher
         name = 'forge'
         url = 'https://files.minecraftforge.net/maven'
+    }
+    maven {
+        name 'Cleanroom Maven'
+        url 'https://maven.cleanroommc.com/'
     }
 }
 
@@ -134,8 +138,8 @@ sourceSets {
     }
     launchwrapper {
         compileClasspath += main.output
-        ext.languageVersion = 8
-        ext.compatibility = '1.8'
+        ext.languageVersion = 17
+        ext.compatibility = '17'
     }
     modlauncher {
         compileClasspath += main.output
@@ -185,6 +189,9 @@ dependencies {
     implementation "org.ow2.asm:asm-commons:$asmVersion"
     implementation "org.ow2.asm:asm-util:$asmVersion"
 
+    implementation 'org.apache.logging.log4j:log4j-api:2.15.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.15.0'
+
     // Annotation Processor
     apImplementation "org.ow2.asm:asm-tree:$asmVersion"
     apImplementation guava
@@ -194,7 +201,7 @@ dependencies {
     fernflowerImplementation 'org.jetbrains:intellij-fernflower:1.0.0.9'
 
     // LegacyLauncher service
-    launchwrapperImplementation ('net.minecraft:launchwrapper:1.11') {
+    launchwrapperImplementation ('com.cleanroommc:bouncepad:1.0') {
         exclude module: 'lwjgl'
         exclude module: 'asm-debug-all'
         exclude module: 'jopt-simple'
