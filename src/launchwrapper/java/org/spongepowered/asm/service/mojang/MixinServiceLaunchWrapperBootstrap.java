@@ -24,10 +24,10 @@
  */
 package org.spongepowered.asm.service.mojang;
 
+import com.cleanroommc.bouncepad.Bouncepad;
+
 import org.spongepowered.asm.service.IMixinServiceBootstrap;
 import org.spongepowered.asm.service.ServiceInitialisationException;
-
-import net.minecraft.launchwrapper.Launch;
 
 /**
  * Bootstrap for LaunchWrapper service
@@ -45,7 +45,7 @@ public class MixinServiceLaunchWrapperBootstrap implements IMixinServiceBootstra
 
     @Override
     public String getName() {
-        return "LaunchWrapper";
+        return "Bouncepad";
     }
 
     @Override
@@ -56,21 +56,21 @@ public class MixinServiceLaunchWrapperBootstrap implements IMixinServiceBootstra
     @Override
     public void bootstrap() {
         try {
-            Launch.classLoader.hashCode();
+            Bouncepad.classLoader.hashCode();
         } catch (Throwable th) {
             throw new ServiceInitialisationException(this.getName() + " is not available");
         }
         
         // Essential ones
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.SERVICE_PACKAGE);
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LAUNCH_PACKAGE);
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LOGGING_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.SERVICE_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LAUNCH_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LOGGING_PACKAGE);
 
         // Important ones
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.ASM_PACKAGE);
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LEGACY_ASM_PACKAGE);
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.MIXIN_PACKAGE);
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.MIXIN_UTIL_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.ASM_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.LEGACY_ASM_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.MIXIN_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceLaunchWrapperBootstrap.MIXIN_UTIL_PACKAGE);
     }
 
 }
