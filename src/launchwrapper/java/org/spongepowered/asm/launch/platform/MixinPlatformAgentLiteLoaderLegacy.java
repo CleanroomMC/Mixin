@@ -26,9 +26,9 @@ package org.spongepowered.asm.launch.platform;
 
 import java.util.Collection;
 
-import com.cleanroommc.bouncepad.Bouncepad;
-
 import org.spongepowered.asm.launch.platform.container.IContainerHandle;
+
+import net.minecraft.launchwrapper.Launch;
 
 /**
  * Platform agent for LiteLoader in legacy (LaunchWrapper) environment
@@ -49,7 +49,7 @@ public class MixinPlatformAgentLiteLoaderLegacy extends MixinPlatformAgentAbstra
      */
     @Override
     public String getSideName() {
-        return MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentLiteLoaderLegacy.LITELOADER_TWEAKER_NAME,
+        return MixinPlatformAgentAbstract.invokeStringMethod(Launch.classLoader, MixinPlatformAgentLiteLoaderLegacy.LITELOADER_TWEAKER_NAME,
                 MixinPlatformAgentLiteLoaderLegacy.GETSIDE_METHOD);
     }
     

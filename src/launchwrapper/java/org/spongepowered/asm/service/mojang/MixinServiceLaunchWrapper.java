@@ -130,7 +130,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     
     @Override
     public String getName() {
-        return "Bouncepad";
+        return "LaunchWrapper";
     }
     
     /* (non-Javadoc)
