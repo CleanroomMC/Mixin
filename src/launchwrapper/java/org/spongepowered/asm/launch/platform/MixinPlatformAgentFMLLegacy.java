@@ -202,7 +202,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     }
 
     private boolean isIgnoredReparseable() {
-        return this.handle.toString().contains("deobfedDeps") || this.handle.toString().contains("deobf_dependencies");
+        return this.handle.toString().contains("deobfedDeps");
     }
 
     /**
