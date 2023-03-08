@@ -200,7 +200,7 @@ dependencies {
     fernflowerImplementation 'org.jetbrains:intellij-fernflower:1.0.0.9'
 
     // LegacyLauncher service
-    launchwrapperImplementation ('com.cleanroommc:bouncepad:0.3') {
+    launchwrapperImplementation ('com.cleanroommc:bouncepad:1.0') {
         exclude module: 'lwjgl'
         exclude module: 'asm-debug-all'
         exclude module: 'jopt-simple'
