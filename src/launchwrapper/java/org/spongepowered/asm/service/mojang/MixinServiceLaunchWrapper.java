@@ -166,7 +166,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
             System.setProperty("mixin.env.remapRefMap", "true");
         }
 
-        if (MixinServiceLaunchWrapper.findInStackTrace("com.cleanroommc.bouncepad.Bouncepad", "launch") > 132) {
+        if (MixinServiceLaunchWrapper.findInStackTrace("com.cleanroommc.bouncepad.Bouncepad", "launch") > 143) {
             return Phase.DEFAULT;
         }
         return Phase.PREINIT;
