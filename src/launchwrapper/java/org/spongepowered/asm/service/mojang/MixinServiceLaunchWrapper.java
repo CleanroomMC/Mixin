@@ -82,6 +82,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
 
     // Blackboard keys
     public static final Keys BLACKBOARD_KEY_TWEAKCLASSES = Keys.of("TweakClasses");
+    public static final Keys BLACKBOARD_KEY_TRUSTEDCLASSES = Keys.of("TrustedClasses");
     public static final Keys BLACKBOARD_KEY_TWEAKS = Keys.of("Tweaks");
     
     private static final String MIXIN_TWEAKER_CLASS = MixinServiceAbstract.LAUNCH_PACKAGE + "MixinTweaker";
@@ -415,6 +416,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     private void buildTransformerDelegationList() {
         MixinServiceLaunchWrapper.logger.debug("Rebuilding transformer delegation list:");
         this.delegatedTransformers = new ArrayList<ILegacyClassTransformer>();
+        List<String> trustedClasses = GlobalProperties.<List<String>>get(MixinServiceLaunchWrapper.BLACKBOARD_KEY_TRUSTEDCLASSES);
         for (ITransformer transformer : this.getTransformers()) {
             if (!(transformer instanceof ILegacyClassTransformer)) {
                 continue;
@@ -429,6 +431,10 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
                     break;
                 }
             }
+
+            if (trustedClasses.stream().anyMatch(it -> it.contains(transformerName)))
+                include = false;
+
             if (include && !legacyTransformer.isDelegationExcluded()) {
                 MixinServiceLaunchWrapper.logger.debug("  Adding:    {}", transformerName);
                 this.delegatedTransformers.add(legacyTransformer);
