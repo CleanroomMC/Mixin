@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.cleanroommc.bouncepad.Bouncepad;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -73,7 +74,6 @@ import com.google.common.io.Closeables;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.Launch;
 
 /**
  * Mixin service for launchwrapper
@@ -125,7 +125,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     private IClassNameTransformer nameTransformer;
     
     public MixinServiceLaunchWrapper() {
-        this.classLoaderUtil = new LaunchClassLoaderUtil(Launch.classLoader);
+        this.classLoaderUtil = new LaunchClassLoaderUtil(Bouncepad.classLoader);
     }
     
     @Override
@@ -140,7 +140,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     public boolean isValid() {
         try {
             // Detect launchwrapper
-            Launch.classLoader.hashCode();
+            Bouncepad.classLoader.hashCode();
         } catch (Throwable ex) {
             return false;
         }
@@ -153,7 +153,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     @Override
     public void prepare() {
         // Only needed in dev, in production this would be handled by the tweaker
-        Launch.classLoader.addClassLoaderExclusion(MixinServiceAbstract.LAUNCH_PACKAGE);
+        Bouncepad.classLoader.addClassLoaderExclusion(MixinServiceAbstract.LAUNCH_PACKAGE);
     }
     
     /* (non-Javadoc)
@@ -305,7 +305,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        return Launch.classLoader.findClass(name);
+        return Bouncepad.classLoader.findClass(name);
     }
 
     /* (non-Javadoc)
@@ -314,7 +314,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public Class<?> findClass(String name, boolean initialize) throws ClassNotFoundException {
-        return Class.forName(name, initialize, Launch.classLoader);
+        return Class.forName(name, initialize, Bouncepad.classLoader);
     }
     
     /* (non-Javadoc)
@@ -323,7 +323,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public Class<?> findAgentClass(String name, boolean initialize) throws ClassNotFoundException {
-        return Class.forName(name, initialize, Launch.class.getClassLoader());
+        return Class.forName(name, initialize, Bouncepad.class.getClassLoader());
     }
     
     /* (non-Javadoc)
@@ -331,7 +331,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public void beginPhase() {
-        Launch.classLoader.registerTransformer(MixinServiceLaunchWrapper.TRANSFORMER_PROXY_CLASS);
+        Bouncepad.classLoader.registerTransformer(MixinServiceLaunchWrapper.TRANSFORMER_PROXY_CLASS);
         this.delegatedTransformers = null;
     }
     
@@ -341,7 +341,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public void checkEnv(Object bootSource) {
-        if (bootSource.getClass().getClassLoader() != Launch.class.getClassLoader()) {
+        if (bootSource.getClass().getClassLoader() != Bouncepad.class.getClassLoader()) {
             throw new MixinException("Attempted to init the mixin environment in the wrong classloader");
         }
     }
@@ -352,7 +352,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public InputStream getResourceAsStream(String name) {
-        return Launch.classLoader.getResourceAsStream(name);
+        return Bouncepad.classLoader.getResourceAsStream(name);
     }
     
     /* (non-Javadoc)
@@ -361,7 +361,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     @Override
     @Deprecated
     public URL[] getClassPath() {
-        return Launch.classLoader.getSources().toArray(new URL[0]);
+        return Bouncepad.classLoader.getSources().toArray(new URL[0]);
     }
     
     /* (non-Javadoc)
@@ -369,7 +369,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Override
     public Collection<ITransformer> getTransformers() {
-        List<IClassTransformer> transformers = Launch.classLoader.getTransformers();
+        List<IClassTransformer> transformers = Bouncepad.classLoader.getTransformers();
         List<ITransformer> wrapped = new ArrayList<ITransformer>(transformers.size());
         for (IClassTransformer transformer : transformers) {
             if (transformer instanceof ITransformer) {
@@ -465,16 +465,16 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
      */
     @Deprecated
     public byte[] getClassBytes(String name, String transformedName) throws IOException {
-        byte[] classBytes = Launch.classLoader.getClassBytes(name);
+        byte[] classBytes = Bouncepad.classLoader.getClassBytes(name);
         if (classBytes != null) {
             return classBytes;
         }
 
         URLClassLoader appClassLoader;
-        if (Launch.class.getClassLoader() instanceof URLClassLoader) {
-            appClassLoader = (URLClassLoader) Launch.class.getClassLoader();
+        if (Bouncepad.class.getClassLoader() instanceof URLClassLoader) {
+            appClassLoader = (URLClassLoader) Bouncepad.class.getClassLoader();
         } else {
-            appClassLoader = new URLClassLoader(new URL[]{}, Launch.class.getClassLoader());
+            appClassLoader = new URLClassLoader(new URL[]{}, Bouncepad.class.getClassLoader());
         }
 
         InputStream classStream = null;
@@ -574,7 +574,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     }
 
     private void findNameTransformer() {
-        List<IClassTransformer> transformers = Launch.classLoader.getTransformers();
+        List<IClassTransformer> transformers = Bouncepad.classLoader.getTransformers();
         for (IClassTransformer transformer : transformers) {
             if (transformer instanceof IClassNameTransformer) {
                 MixinServiceLaunchWrapper.logger.debug("Found name transformer: {}", transformer.getClass().getName());
