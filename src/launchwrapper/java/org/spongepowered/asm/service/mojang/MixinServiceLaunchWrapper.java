@@ -432,7 +432,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
                 }
             }
 
-            if (trustedClasses.stream().anyMatch(it -> it.contains(transformerName)))
+            if (trustedClasses.stream().noneMatch(it -> it.contains(transformerName)))
                 include = false;
 
             if (include && !legacyTransformer.isDelegationExcluded()) {
