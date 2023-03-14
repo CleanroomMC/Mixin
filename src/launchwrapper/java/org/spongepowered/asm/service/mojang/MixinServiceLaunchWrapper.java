@@ -416,7 +416,6 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     private void buildTransformerDelegationList() {
         MixinServiceLaunchWrapper.logger.debug("Rebuilding transformer delegation list:");
         this.delegatedTransformers = new ArrayList<ILegacyClassTransformer>();
-        List<String> trustedClasses = GlobalProperties.<List<String>>get(MixinServiceLaunchWrapper.BLACKBOARD_KEY_TRUSTEDCLASSES);
         for (ITransformer transformer : this.getTransformers()) {
             if (!(transformer instanceof ILegacyClassTransformer)) {
                 continue;
@@ -431,9 +430,6 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
                     break;
                 }
             }
-
-            if (trustedClasses.stream().noneMatch(it -> it.contains(transformerName)))
-                include = false;
 
             if (include && !legacyTransformer.isDelegationExcluded()) {
                 MixinServiceLaunchWrapper.logger.debug("  Adding:    {}", transformerName);

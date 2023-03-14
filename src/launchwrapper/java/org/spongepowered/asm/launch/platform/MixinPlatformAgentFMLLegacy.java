@@ -302,7 +302,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      */
     @Override
     public void inject() {
-        if (this.coreModWrapper != null && this.checkForCoInitialisation()) {
+        if (this.coreModWrapper != null && this.checkForCoInitialisation() && this.safeCoremodToLoad()) {
             MixinPlatformAgentAbstract.logger.debug("FML agent is co-initializing coremod instance {} for {}", this.coreModWrapper, this.handle);
             this.coreModWrapper.injectIntoClassLoader(Bouncepad.classLoader);
         }
@@ -329,6 +329,21 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         }
         
         return !MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_DEOBF);
+    }
+
+    /**
+     * Performs a naive check which attempts to discover whether the coremod
+     * itself is safe to loading or not. This occurs when mixin
+     * tweaker is loaded explicitly.
+     *
+     * <p>In the event that we are <i>post</i> FML's injection, then we must
+     * instead call <tt>injectIntoClassLoader</tt> on the wrapper manually.</p>
+     *
+     * @return true if the coremod was safe to be load up
+     */
+    protected final boolean safeCoremodToLoad() {
+        List<String> trustedClasses = GlobalProperties.<List<String>>get(MixinServiceLaunchWrapper.BLACKBOARD_KEY_TRUSTEDCLASSES);
+        return trustedClasses.stream().anyMatch(it -> this.coreModWrapper.toString().contains(it));
     }
 
     /**
