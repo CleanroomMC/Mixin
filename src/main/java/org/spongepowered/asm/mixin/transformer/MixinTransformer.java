@@ -42,7 +42,7 @@ import org.spongepowered.asm.util.asm.ASM;
 /**
  * Transformer which manages the mixin configuration and application process
  */
-public final class MixinTransformer extends TreeTransformer implements IMixinTransformer {
+final class MixinTransformer extends TreeTransformer implements IMixinTransformer {
     
     /**
      * Impl of mixin transformer factory
@@ -86,7 +86,7 @@ public final class MixinTransformer extends TreeTransformer implements IMixinTra
     /**
      * Mixin processor which actually manages application of mixins
      */
-    public final MixinProcessor processor;
+    private final MixinProcessor processor;
     
     /**
      * Class generator 
