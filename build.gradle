@@ -33,9 +33,7 @@ version = buildVersion + "+mixin." + upstreamMixinVersion
 
 
 def ENV = System.getenv()
-if (!ENV.CI) {
-    version = version + "-local"
-}
+
 
 // Extended project information
 ext.projectName = 'Mixin'
