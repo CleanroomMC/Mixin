@@ -429,7 +429,6 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
                     break;
                 }
             }
-
             if (include && !legacyTransformer.isDelegationExcluded()) {
                 MixinServiceLaunchWrapper.logger.debug("  Adding:    {}", transformerName);
                 this.delegatedTransformers.add(legacyTransformer);
