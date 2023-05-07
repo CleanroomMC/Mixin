@@ -34,6 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.cleanroommc.bouncepad.Bouncepad;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +52,6 @@ import org.spongepowered.asm.util.Constants;
 import org.spongepowered.asm.util.IConsumer;
 
 import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 /**
@@ -238,7 +239,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         Method mdLoadCoreMod = this.clCoreModManager.getDeclaredMethod(GlobalProperties.getString(GlobalProperties.Keys.FML_LOAD_CORE_MOD,
                 MixinPlatformAgentFMLLegacy.LOAD_CORE_MOD_METHOD), LaunchClassLoader.class, String.class, File.class);
         mdLoadCoreMod.setAccessible(true);
-        ITweaker wrapper = (ITweaker)mdLoadCoreMod.invoke(null, Launch.classLoader, coreModName, this.file);
+        ITweaker wrapper = (ITweaker)mdLoadCoreMod.invoke(null, Bouncepad.classLoader, coreModName, this.file);
         if (wrapper == null) {
             MixinPlatformAgentAbstract.logger.debug("Core plugin {} could not be loaded.", coreModName);
             return null;
@@ -301,9 +302,9 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      */
     @Override
     public void inject() {
-        if (this.coreModWrapper != null && this.checkForCoInitialisation()) {
+        if (this.coreModWrapper != null && this.checkForCoInitialisation() && this.safeCoremodToLoad()) {
             MixinPlatformAgentAbstract.logger.debug("FML agent is co-initializing coremod instance {} for {}", this.coreModWrapper, this.handle);
-            this.coreModWrapper.injectIntoClassLoader(Launch.classLoader);
+            this.coreModWrapper.injectIntoClassLoader(Bouncepad.classLoader);
         }
     }
 
@@ -328,6 +329,21 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         }
         
         return !MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_DEOBF);
+    }
+
+    /**
+     * Performs a naive check which attempts to discover whether the coremod
+     * itself is safe to loading or not. This occurs when mixin
+     * tweaker is loaded explicitly.
+     *
+     * <p>In the event that we are <i>post</i> FML's injection, then we must
+     * instead call <tt>injectIntoClassLoader</tt> on the wrapper manually.</p>
+     *
+     * @return true if the coremod was safe to be load up
+     */
+    protected final boolean safeCoremodToLoad() {
+        List<String> trustedClasses = GlobalProperties.<List<String>>get(MixinServiceLaunchWrapper.BLACKBOARD_KEY_TRUSTEDCLASSES);
+        return trustedClasses.stream().anyMatch(it -> this.coreModWrapper.toString().contains(it));
     }
 
     /**
@@ -405,7 +421,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     private void injectRemapper() {
         try {
             MixinPlatformAgentAbstract.logger.debug("Creating FML remapper adapter: {}", MixinPlatformAgentFMLLegacy.FML_REMAPPER_ADAPTER_CLASS);
-            Class<?> clFmlRemapperAdapter = Class.forName(MixinPlatformAgentFMLLegacy.FML_REMAPPER_ADAPTER_CLASS, true, Launch.classLoader);
+            Class<?> clFmlRemapperAdapter = Class.forName(MixinPlatformAgentFMLLegacy.FML_REMAPPER_ADAPTER_CLASS, true, Bouncepad.classLoader);
             Method mdCreate = clFmlRemapperAdapter.getDeclaredMethod("create");
             IRemapper remapper = (IRemapper)mdCreate.invoke(null);
             MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
@@ -434,13 +450,13 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
             }
         }
 
-        String name = MixinPlatformAgentAbstract.invokeStringMethod(Launch.classLoader, MixinPlatformAgentFMLLegacy.NEW_LAUNCH_HANDLER_CLASS,
+        String name = MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLLegacy.NEW_LAUNCH_HANDLER_CLASS,
                 MixinPlatformAgentFMLLegacy.GETSIDE_METHOD);
         if (name != null) {
             return name;
         }
         
-        return MixinPlatformAgentAbstract.invokeStringMethod(Launch.classLoader, MixinPlatformAgentFMLLegacy.OLD_LAUNCH_HANDLER_CLASS,
+        return MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLLegacy.OLD_LAUNCH_HANDLER_CLASS,
                 MixinPlatformAgentFMLLegacy.GETSIDE_METHOD);
     }
 

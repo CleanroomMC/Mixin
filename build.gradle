@@ -73,11 +73,13 @@ configurations {
     exampleImplementation       .extendsFrom implementation
     fernflowerImplementation    .extendsFrom implementation
     launchwrapperImplementation .extendsFrom implementation
+    bouncepadImplementation     .extendsFrom implementation
     agentImplementation         .extendsFrom implementation
 
     proguard {
         extendsFrom fernflowerImplementation
         extendsFrom launchwrapperImplementation
+        extendsFrom bouncepadImplementation
         extendsFrom compileClasspath
     }
 }
@@ -124,6 +126,11 @@ sourceSets {
     }
     launchwrapper {
         compileClasspath += main.output
+        ext.languageVersion = 8
+        ext.compatibility = '1.8'
+    }
+    bouncepad {
+        compileClasspath += main.output
         ext.languageVersion = 17
     }
 }
@@ -166,7 +173,14 @@ dependencies {
     fernflowerImplementation 'org.jetbrains:intellij-fernflower:1.0.0.9'
 
     // LegacyLauncher service
-    launchwrapperImplementation ('com.cleanroommc:bouncepad:0.3') {
+    launchwrapperImplementation ('net.minecraft:launchwrapper:1.11') {
+        exclude module: 'lwjgl'
+        exclude module: 'asm-debug-all'
+        exclude module: 'jopt-simple'
+    }
+
+    // Bouncepad service
+    bouncepadImplementation ('com.cleanroommc:bouncepad:0.3') {
         exclude module: 'lwjgl'
         exclude module: 'asm-debug-all'
         exclude module: 'jopt-simple'
