@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.asm.service.mojang;
+package org.spongepowered.asm.service.cleanroom;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
