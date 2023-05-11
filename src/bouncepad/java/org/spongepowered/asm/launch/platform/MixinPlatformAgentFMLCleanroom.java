@@ -55,14 +55,14 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
 /**
- * Platform agent for use under FML and LaunchWrapper.
- * 
+ * Platform agent for use under Cleanroom Loader and Bouncepad.
+ *
  * <p>When FML is present we scan containers for the manifest entries which are
  * inhibited by the tweaker, in particular the <tt>FMLCorePlugin</tt> and
  * <tt>FMLCorePluginContainsFMLMod</tt> entries. This is required because FML
  * performs no further processing of containers if they contain a tweaker!</p>
  */
-public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract implements IMixinPlatformServiceAgent {
+public class MixinPlatformAgentFMLCleanroom extends MixinPlatformAgentAbstract implements IMixinPlatformServiceAgent {
     
     private static final String OLD_LAUNCH_HANDLER_CLASS = "cpw.mods.fml.relauncher.FMLLaunchHandler";
     private static final String NEW_LAUNCH_HANDLER_CLASS = "net.minecraftforge.fml.relauncher.FMLLaunchHandler";
@@ -101,10 +101,10 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      * startup so that we know to ignore them
      */
     static {
-        for (String cmdLineCoreMod : System.getProperty(MixinPlatformAgentFMLLegacy.FML_CMDLINE_COREMODS, "").split(",")) {
+        for (String cmdLineCoreMod : System.getProperty(MixinPlatformAgentFMLCleanroom.FML_CMDLINE_COREMODS, "").split(",")) {
             if (!cmdLineCoreMod.isEmpty()) {
                 MixinPlatformAgentAbstract.logger.debug("FML platform agent will ignore coremod {} specified on the command line", cmdLineCoreMod);
-                MixinPlatformAgentFMLLegacy.loadedCoreMods.add(cmdLineCoreMod);
+                MixinPlatformAgentFMLCleanroom.loadedCoreMods.add(cmdLineCoreMod);
             }
         }
     }
@@ -161,7 +161,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      */
     private ITweaker initFMLCoreMod() {
         try {
-            if ("true".equalsIgnoreCase(this.handle.getAttribute(MixinPlatformAgentFMLLegacy.MFATT_FORCELOADASMOD))) {
+            if ("true".equalsIgnoreCase(this.handle.getAttribute(MixinPlatformAgentFMLCleanroom.MFATT_FORCELOADASMOD))) {
                 MixinPlatformAgentAbstract.logger.debug("ForceLoadAsMod was specified for {}, attempting force-load", this.fileName);
                 this.loadAsMod();
             }
@@ -186,12 +186,12 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      */
     private void loadAsMod() {
         try {
-            MixinPlatformAgentFMLLegacy.getIgnoredMods(this.clCoreModManager).remove(this.fileName);
+            MixinPlatformAgentFMLCleanroom.getIgnoredMods(this.clCoreModManager).remove(this.fileName);
         } catch (Exception ex) {
             MixinPlatformAgentAbstract.logger.catching(ex);
         }
         
-        if (this.handle.getAttribute(MixinPlatformAgentFMLLegacy.MFATT_COREMODCONTAINSMOD) != null) {
+        if (this.handle.getAttribute(MixinPlatformAgentFMLCleanroom.MFATT_COREMODCONTAINSMOD) != null) {
             if (this.isIgnoredReparseable()) {
                 MixinPlatformAgentAbstract.logger.debug(
                         "Ignoring request to add {} to reparseable coremod collection - it is a deobfuscated dependency", this.fileName);
@@ -212,7 +212,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     private void addReparseableJar() {
         try {
             Method mdGetReparsedCoremods = this.clCoreModManager.getDeclaredMethod(GlobalProperties.getString(
-                    GlobalProperties.Keys.FML_GET_REPARSEABLE_COREMODS, MixinPlatformAgentFMLLegacy.GET_REPARSEABLE_COREMODS_METHOD));
+                    GlobalProperties.Keys.FML_GET_REPARSEABLE_COREMODS, MixinPlatformAgentFMLCleanroom.GET_REPARSEABLE_COREMODS_METHOD));
             @SuppressWarnings("unchecked")
             List<String> reparsedCoremods = (List<String>)mdGetReparsedCoremods.invoke(null);
             if (!reparsedCoremods.contains(this.fileName)) {
@@ -225,7 +225,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     }
 
     private ITweaker injectCorePlugin() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String coreModName = this.handle.getAttribute(MixinPlatformAgentFMLLegacy.MFATT_FMLCOREPLUGIN);
+        String coreModName = this.handle.getAttribute(MixinPlatformAgentFMLCleanroom.MFATT_FMLCOREPLUGIN);
         if (coreModName == null) {
             return null;
         }
@@ -237,7 +237,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         
         MixinPlatformAgentAbstract.logger.debug("{} has core plugin {}. Injecting it into FML for co-initialisation:", this.fileName, coreModName);
         Method mdLoadCoreMod = this.clCoreModManager.getDeclaredMethod(GlobalProperties.getString(GlobalProperties.Keys.FML_LOAD_CORE_MOD,
-                MixinPlatformAgentFMLLegacy.LOAD_CORE_MOD_METHOD), LaunchClassLoader.class, String.class, File.class);
+                MixinPlatformAgentFMLCleanroom.LOAD_CORE_MOD_METHOD), LaunchClassLoader.class, String.class, File.class);
         mdLoadCoreMod.setAccessible(true);
         ITweaker wrapper = (ITweaker)mdLoadCoreMod.invoke(null, Bouncepad.classLoader, coreModName, this.file);
         if (wrapper == null) {
@@ -247,15 +247,15 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         
         // If the injection tweaker is queued, we are most likely in development
         // and will NOT need to co-init the coremod
-        this.initInjectionState = MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_INJECTION);
+        this.initInjectionState = MixinPlatformAgentFMLCleanroom.isTweakerQueued(MixinPlatformAgentFMLCleanroom.FML_TWEAKER_INJECTION);
 
-        MixinPlatformAgentFMLLegacy.loadedCoreMods.add(coreModName);
+        MixinPlatformAgentFMLCleanroom.loadedCoreMods.add(coreModName);
         return wrapper;
     }
     
     private boolean isAlreadyInjected(String coreModName) {
         // Did we already inject this ourselves, or was it specified on the command line
-        if (MixinPlatformAgentFMLLegacy.loadedCoreMods.contains(coreModName)) {
+        if (MixinPlatformAgentFMLCleanroom.loadedCoreMods.contains(coreModName)) {
             return true;
         }
         
@@ -268,8 +268,8 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
             
             for (ITweaker tweaker : tweakers) {
                 Class<? extends ITweaker> tweakClass = tweaker.getClass();
-                if (MixinPlatformAgentFMLLegacy.FML_PLUGIN_WRAPPER_CLASS.equals(tweakClass.getSimpleName())) {
-                    Field fdCoreModInstance = tweakClass.getField(MixinPlatformAgentFMLLegacy.FML_CORE_MOD_INSTANCE_FIELD);
+                if (MixinPlatformAgentFMLCleanroom.FML_PLUGIN_WRAPPER_CLASS.equals(tweakClass.getSimpleName())) {
+                    Field fdCoreModInstance = tweakClass.getField(MixinPlatformAgentFMLCleanroom.FML_CORE_MOD_INSTANCE_FIELD);
                     fdCoreModInstance.setAccessible(true);
                     Object coreMod = fdCoreModInstance.get(tweaker);
                     if (coreModName.equals(coreMod.getClass().getName())) {
@@ -286,7 +286,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
 
     @Override
     public String getPhaseProvider() {
-        return MixinPlatformAgentFMLLegacy.class.getName() + "$PhaseProvider";
+        return MixinPlatformAgentFMLCleanroom.class.getName() + "$PhaseProvider";
     }
 
     /* (non-Javadoc)
@@ -294,7 +294,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      */
     @Override
     public void prepare() {
-        this.initInjectionState |= MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_INJECTION);
+        this.initInjectionState |= MixinPlatformAgentFMLCleanroom.isTweakerQueued(MixinPlatformAgentFMLCleanroom.FML_TWEAKER_INJECTION);
     }
 
     /* (non-Javadoc)
@@ -321,14 +321,14 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
      * @return true if FML was already injected
      */
     protected final boolean checkForCoInitialisation() {
-        boolean injectionTweaker = MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_INJECTION);
-        boolean terminalTweaker = MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_TERMINAL);
+        boolean injectionTweaker = MixinPlatformAgentFMLCleanroom.isTweakerQueued(MixinPlatformAgentFMLCleanroom.FML_TWEAKER_INJECTION);
+        boolean terminalTweaker = MixinPlatformAgentFMLCleanroom.isTweakerQueued(MixinPlatformAgentFMLCleanroom.FML_TWEAKER_TERMINAL);
         if ((this.initInjectionState && terminalTweaker) || injectionTweaker) {
             MixinPlatformAgentAbstract.logger.debug("FML agent is skipping co-init for {} because FML will inject it normally", this.coreModWrapper);
             return false;
         }
         
-        return !MixinPlatformAgentFMLLegacy.isTweakerQueued(MixinPlatformAgentFMLLegacy.FML_TWEAKER_DEOBF);
+        return !MixinPlatformAgentFMLCleanroom.isTweakerQueued(MixinPlatformAgentFMLCleanroom.FML_TWEAKER_DEOBF);
     }
 
     /**
@@ -358,9 +358,9 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         try {
             try {
                 this.clCoreModManager = Class.forName(GlobalProperties.getString(
-                        GlobalProperties.Keys.FML_CORE_MOD_MANAGER, MixinPlatformAgentFMLLegacy.CORE_MOD_MANAGER_CLASS));
+                        GlobalProperties.Keys.FML_CORE_MOD_MANAGER, MixinPlatformAgentFMLCleanroom.CORE_MOD_MANAGER_CLASS));
             } catch (ClassNotFoundException ex) {
-                this.clCoreModManager = Class.forName(MixinPlatformAgentFMLLegacy.CORE_MOD_MANAGER_CLASS_LEGACY);
+                this.clCoreModManager = Class.forName(MixinPlatformAgentFMLCleanroom.CORE_MOD_MANAGER_CLASS_LEGACY);
             }
         } catch (ClassNotFoundException ex) {
             MixinPlatformAgentAbstract.logger.info("FML platform manager could not load class {}. Proceeding without FML support.",
@@ -392,11 +392,11 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
         
         try {
             mdGetIgnoredMods = clCoreModManager.getDeclaredMethod(GlobalProperties.getString(
-                    GlobalProperties.Keys.FML_GET_IGNORED_MODS, MixinPlatformAgentFMLLegacy.GET_IGNORED_MODS_METHOD));
+                    GlobalProperties.Keys.FML_GET_IGNORED_MODS, MixinPlatformAgentFMLCleanroom.GET_IGNORED_MODS_METHOD));
         } catch (NoSuchMethodException ex1) {
             try {
                 // Legacy name
-                mdGetIgnoredMods = clCoreModManager.getDeclaredMethod(MixinPlatformAgentFMLLegacy.GET_IGNORED_MODS_METHOD_LEGACY);
+                mdGetIgnoredMods = clCoreModManager.getDeclaredMethod(MixinPlatformAgentFMLCleanroom.GET_IGNORED_MODS_METHOD_LEGACY);
             } catch (NoSuchMethodException ex2) {
                 MixinPlatformAgentAbstract.logger.catching(org.spongepowered.asm.logging.Level.DEBUG, ex2);
                 return Collections.<String>emptyList();
@@ -420,8 +420,8 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
 
     private void injectRemapper() {
         try {
-            MixinPlatformAgentAbstract.logger.debug("Creating FML remapper adapter: {}", MixinPlatformAgentFMLLegacy.FML_REMAPPER_ADAPTER_CLASS);
-            Class<?> clFmlRemapperAdapter = Class.forName(MixinPlatformAgentFMLLegacy.FML_REMAPPER_ADAPTER_CLASS, true, Bouncepad.classLoader);
+            MixinPlatformAgentAbstract.logger.debug("Creating FML remapper adapter: {}", MixinPlatformAgentFMLCleanroom.FML_REMAPPER_ADAPTER_CLASS);
+            Class<?> clFmlRemapperAdapter = Class.forName(MixinPlatformAgentFMLCleanroom.FML_REMAPPER_ADAPTER_CLASS, true, Bouncepad.classLoader);
             Method mdCreate = clFmlRemapperAdapter.getDeclaredMethod("create");
             IRemapper remapper = (IRemapper)mdCreate.invoke(null);
             MixinEnvironment.getDefaultEnvironment().getRemappers().add(remapper);
@@ -443,21 +443,21 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
             return null;
         }
         for (ITweaker tweaker : tweakerList) {
-            if (tweaker.getClass().getName().endsWith(MixinPlatformAgentFMLLegacy.SERVER_TWEAKER_TAIL)) {
+            if (tweaker.getClass().getName().endsWith(MixinPlatformAgentFMLCleanroom.SERVER_TWEAKER_TAIL)) {
                 return Constants.SIDE_SERVER;
-            } else if (tweaker.getClass().getName().endsWith(MixinPlatformAgentFMLLegacy.CLIENT_TWEAKER_TAIL)) {
+            } else if (tweaker.getClass().getName().endsWith(MixinPlatformAgentFMLCleanroom.CLIENT_TWEAKER_TAIL)) {
                 return Constants.SIDE_CLIENT;
             }
         }
 
-        String name = MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLLegacy.NEW_LAUNCH_HANDLER_CLASS,
-                MixinPlatformAgentFMLLegacy.GETSIDE_METHOD);
+        String name = MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLCleanroom.NEW_LAUNCH_HANDLER_CLASS,
+                MixinPlatformAgentFMLCleanroom.GETSIDE_METHOD);
         if (name != null) {
             return name;
         }
         
-        return MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLLegacy.OLD_LAUNCH_HANDLER_CLASS,
-                MixinPlatformAgentFMLLegacy.GETSIDE_METHOD);
+        return MixinPlatformAgentAbstract.invokeStringMethod(Bouncepad.classLoader, MixinPlatformAgentFMLCleanroom.OLD_LAUNCH_HANDLER_CLASS,
+                MixinPlatformAgentFMLCleanroom.GETSIDE_METHOD);
     }
 
     /* (non-Javadoc)
@@ -476,7 +476,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     public void wire(Phase phase, IConsumer<Phase> phaseConsumer) {
         super.wire(phase, phaseConsumer);
         if (phase == Phase.PREINIT) {
-            MixinPlatformAgentFMLLegacy.begin(phaseConsumer);
+            MixinPlatformAgentFMLCleanroom.begin(phaseConsumer);
         }
     }
     
@@ -488,7 +488,7 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
     @Override
     @Deprecated
     public void unwire() {
-        MixinPlatformAgentFMLLegacy.end();
+        MixinPlatformAgentFMLCleanroom.end();
     }
 
     static MixinAppender appender;
@@ -514,20 +514,20 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
             return;
         }
         
-        MixinPlatformAgentFMLLegacy.log = (org.apache.logging.log4j.core.Logger)fmlLog;
-        MixinPlatformAgentFMLLegacy.oldLevel = MixinPlatformAgentFMLLegacy.log.getLevel();
+        MixinPlatformAgentFMLCleanroom.log = (org.apache.logging.log4j.core.Logger)fmlLog;
+        MixinPlatformAgentFMLCleanroom.oldLevel = MixinPlatformAgentFMLCleanroom.log.getLevel();
         
-        MixinPlatformAgentFMLLegacy.appender = new MixinAppender(delegate);
-        MixinPlatformAgentFMLLegacy.appender.start();
-        MixinPlatformAgentFMLLegacy.log.addAppender(MixinPlatformAgentFMLLegacy.appender);
+        MixinPlatformAgentFMLCleanroom.appender = new MixinAppender(delegate);
+        MixinPlatformAgentFMLCleanroom.appender.start();
+        MixinPlatformAgentFMLCleanroom.log.addAppender(MixinPlatformAgentFMLCleanroom.appender);
         
-        MixinPlatformAgentFMLLegacy.log.setLevel(Level.ALL);
+        MixinPlatformAgentFMLCleanroom.log.setLevel(Level.ALL);
     }
     
     static void end() {
-        if (MixinPlatformAgentFMLLegacy.log != null) {
+        if (MixinPlatformAgentFMLCleanroom.log != null) {
             // remove appender, we're done watching for messages
-            MixinPlatformAgentFMLLegacy.log.removeAppender(MixinPlatformAgentFMLLegacy.appender);
+            MixinPlatformAgentFMLCleanroom.log.removeAppender(MixinPlatformAgentFMLCleanroom.appender);
         }
     }
 
@@ -558,8 +558,8 @@ public class MixinPlatformAgentFMLLegacy extends MixinPlatformAgentAbstract impl
             // overwrite that change. No null check is needed here
             // because the appender will not be injected if the log is
             // null
-            if (MixinPlatformAgentFMLLegacy.log.getLevel() == Level.ALL) {
-                MixinPlatformAgentFMLLegacy.log.setLevel(MixinPlatformAgentFMLLegacy.oldLevel);
+            if (MixinPlatformAgentFMLCleanroom.log.getLevel() == Level.ALL) {
+                MixinPlatformAgentFMLCleanroom.log.setLevel(MixinPlatformAgentFMLCleanroom.oldLevel);
             }
         }
         

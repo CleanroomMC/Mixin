@@ -76,7 +76,7 @@ import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 
 /**
- * Mixin service for launchwrapper
+ * Mixin service for Bouncepad
  */
 public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements IClassProvider, IClassBytecodeProvider, ITransformerProvider {
 
@@ -140,7 +140,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     @Override
     public boolean isValid() {
         try {
-            // Detect launchwrapper
+            // Detect Bouncepad
             Bouncepad.classLoader.hashCode();
         } catch (Throwable ex) {
             return false;
@@ -210,8 +210,7 @@ public class MixinServiceLaunchWrapper extends MixinServiceAbstract implements I
     @Override
     public Collection<String> getPlatformAgents() {
         return ImmutableList.<String>of(
-            "org.spongepowered.asm.launch.platform.MixinPlatformAgentFMLLegacy",
-            "org.spongepowered.asm.launch.platform.MixinPlatformAgentLiteLoaderLegacy"
+            "org.spongepowered.asm.launch.platform.MixinPlatformAgentFMLCleanroom"
         );
     }
     
